@@ -17,7 +17,7 @@
 #define _TK
 
 #include <tcl.h>
-#if (TCL_MAJOR_VERSION < 8) || (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 7)
+#if (TCL_MAJOR_VERSION < 9) && defined(TCL_MINOR_VERSION) && (TCL_MINOR_VERSION < 7)
 #	error Tk 9.0 must be compiled with tcl.h from Tcl 8.7 or better
 #endif
 
@@ -54,7 +54,7 @@ extern "C" {
  * library/tk.tcl	(1 LOC patch)
  * unix/configure.ac	(2 LOC Major, 2 LOC minor, 1 LOC patch)
  * win/configure.ac	(as above)
- * README		(sections 0 and 1)
+ * README.md		(sections 0 and 1)
  * macosx/Tk-Common.xcconfig (not patchlevel) 1 LOC
  * win/README		(not patchlevel)
  * unix/README		(not patchlevel)
@@ -71,10 +71,10 @@ extern "C" {
 #if TK_MAJOR_VERSION == 9
 #   define TK_MINOR_VERSION	0
 #   define TK_RELEASE_LEVEL	TCL_BETA_RELEASE
-#   define TK_RELEASE_SERIAL	2
+#   define TK_RELEASE_SERIAL	4
 
 #   define TK_VERSION		"9.0"
-#   define TK_PATCH_LEVEL		"9.0b2"
+#   define TK_PATCH_LEVEL		"9.0b4"
 #endif /* TK_MAJOR_VERSION */
 
 /*
@@ -227,8 +227,12 @@ typedef struct Tk_OptionSpec {
  * Tk_ConfigSpec structures, so be sure to coordinate any changes carefully.
  */
 
-#define TK_OPTION_NULL_OK		(1 << 0)
 #define TK_OPTION_DONT_SET_DEFAULT	(1 << 3)
+#if TCL_MAJOR_VERSION > 8
+#    define TK_OPTION_NULL_OK		TCL_NULL_OK
+#else
+#    define TK_OPTION_NULL_OK		(1 << 0)
+#endif
 #define TK_OPTION_VAR(type)		((sizeof(type) < 2 * sizeof(int)) ? ((int)(sizeof(type)&(sizeof(int)-1))<<6) : (3<<6))
 #define TK_OPTION_ENUM_VAR		TK_OPTION_VAR(Tk_OptionType)
 
@@ -409,10 +413,14 @@ typedef enum {
  * (internal-use-only flags are defined there).
  */
 
-#define TK_CONFIG_NULL_OK		(1 << 0)
 #define TK_CONFIG_COLOR_ONLY		(1 << 1)
 #define TK_CONFIG_MONO_ONLY		(1 << 2)
 #define TK_CONFIG_DONT_SET_DEFAULT	(1 << 3)
+#if TCL_MAJOR_VERSION > 8
+#    define TK_CONFIG_NULL_OK		TCL_NULL_OK
+#else
+#    define TK_CONFIG_NULL_OK		(1 << 0)
+#endif
 #define TK_CONFIG_USER_BIT		0x100
 #endif /* __NO_OLD_CONFIG */
 
@@ -1185,7 +1193,7 @@ typedef struct Tk_Outline {
     double width;		/* Width of outline. */
     double activeWidth;		/* Width of outline. */
     double disabledWidth;	/* Width of outline. */
-    int offset;			/* Dash offset. */
+    Tcl_Obj *offsetObj;		/* Dash offset. */
     Tk_Dash dash;		/* Dash pattern. */
     Tk_Dash activeDash;		/* Dash pattern if state is active. */
     Tk_Dash disabledDash;	/* Dash pattern if state is disabled. */

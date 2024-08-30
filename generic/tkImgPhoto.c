@@ -613,14 +613,14 @@ ImgPhotoCmd(
 	srcHandle = Tk_FindPhoto(interp, Tcl_GetString(options.name));
 	if (srcHandle == NULL) {
 	    Tcl_SetObjResult(interp, Tcl_ObjPrintf(
-		    "image \"%s\" doesn't exist or is not a photo image",
+		    "image \"%s\" does not exist or is not a photo image",
 		    Tcl_GetString(options.name)));
 	    Tcl_SetErrorCode(interp, "TK", "LOOKUP", "PHOTO",
 		    Tcl_GetString(options.name), (char *)NULL);
 	    return TCL_ERROR;
 	}
 	Tk_PhotoGetImage(srcHandle, &block);
-	if ((options.fromX2 > block.width) || (options.fromY2 > block.height)
+	if ((options.fromX > block.width) || (options.fromY > block.height)
 		|| (options.fromX2 > block.width)
 		|| (options.fromY2 > block.height)) {
 	    Tcl_SetObjResult(interp, Tcl_NewStringObj(
@@ -1053,11 +1053,6 @@ ImgPhotoCmd(
 	    Tcl_Close(NULL, chan);
 	    return TCL_ERROR;
 	}
-	if (Tcl_SetChannelOption(interp, chan, "-encoding", "binary")
-		!= TCL_OK) {
-	    Tcl_Close(NULL, chan);
-	    return TCL_ERROR;
-	}
 
 	if (MatchFileFormat(interp, chan,
 		Tcl_GetString(options.name), options.format,
@@ -1352,6 +1347,7 @@ readCleanup:
 
 	}
 	Tcl_Panic("unexpected fallthrough");
+	break;
     }
 
     case PHOTO_WRITE: {
@@ -2092,12 +2088,8 @@ ImgPhotoConfigureModel(
 	metadataOutObj = Tcl_NewDictObj();
 	Tcl_IncrRefCount(metadataOutObj);
 
-	/*
-	 * -translation binary also sets -encoding binary
-	 */
-
-	if ((Tcl_SetChannelOption(interp, chan,
-		"-translation", "binary") != TCL_OK) ||
+	if ((Tcl_SetChannelOption(interp, chan, "-translation", "binary")
+		!= TCL_OK) ||
 		(MatchFileFormat(interp, chan, modelPtr->fileString,
 			modelPtr->format, modelPtr->metadata, metadataOutObj,
 			&imageFormat, &imageFormatVersion3,

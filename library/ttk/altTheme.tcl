@@ -100,7 +100,8 @@ namespace eval ttk::theme::alt {
 	ttk::style configure Item \
 	    -indicatormargins {1.5p 1.5p 3p 1.5p}
 	ttk::style configure Treeview -background $colors(-window) \
-	    -stripedbackground $colors(-alternate) -indent 15p
+	    -stripedbackground $colors(-alternate) -indent 15p \
+	    -focuswidth 1 -focuscolor $colors(-selectbg)
 	ttk::setTreeviewRowHeight
 	ttk::style configure Treeview.Separator \
 	    -background $colors(-alternate)
@@ -117,5 +118,36 @@ namespace eval ttk::theme::alt {
 	ttk::style configure TProgressbar \
 	    -background $colors(-selectbg) -borderwidth 0 \
 	    -barsize 22.5p -thickness 11.25p
+    }
+}
+
+# ttk::theme::alt::configureNotebookStyle --
+#
+# Sets theme-specific option values for the ttk::notebook style $style and the
+# style $style.Tab.  Invoked by ::ttk::configureNotebookStyle.
+
+proc ttk::theme::alt::configureNotebookStyle {style} {
+    set tabPos [ttk::style lookup $style -tabposition {} nw]
+    switch -- [string index $tabPos 0] {
+	n {
+	    ttk::style configure $style -tabmargins     {1.5p 1.5p 0.75p 0}
+	    ttk::style map $style.Tab -expand {selected {1.5p 1.5p 0.75p 0}}
+	}
+	s {
+	    ttk::style configure $style -tabmargins     {1.5p 0 0.75p 1.5p}
+	    ttk::style map $style.Tab -expand {selected {1.5p 0 0.75p 1.5p}}
+	}
+	w {
+	    ttk::style configure $style -tabmargins     {1.5p 1.5p 0 0.75p}
+	    ttk::style map $style.Tab -expand {selected {1.5p 1.5p 0 0.75p}}
+	}
+	e {
+	    ttk::style configure $style -tabmargins     {0 1.5p 1.5p 0.75p}
+	    ttk::style map $style.Tab -expand {selected {0 1.5p 1.5p 0.75p}}
+	}
+	default {
+	    ttk::style configure $style -tabmargins     {1.5p 1.5p 0.75p 0}
+	    ttk::style map $style.Tab -expand {selected {1.5p 1.5p 0.75p 0}}
+	}
     }
 }

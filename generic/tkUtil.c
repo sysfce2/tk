@@ -23,7 +23,7 @@
  */
 
 const TkObjType tkStateKeyObjType = {
-    {"statekey",			/* name */
+    {"statekey",		/* name */
     NULL,			/* freeIntRepProc */
     NULL,			/* dupIntRepProc */
     NULL,			/* updateStringProc */
@@ -103,7 +103,7 @@ TkStateParseProc(
     }
     Tcl_AppendToObj(msgObj, " or disabled", TCL_INDEX_NONE);
     Tcl_SetObjResult(interp, msgObj);
-    Tcl_SetErrorCode(interp, "TK", "VALUE", "STATE", NULL);
+    Tcl_SetErrorCode(interp, "TK", "VALUE", "STATE", (char *)NULL);
     *statePtr = TK_STATE_NORMAL;
     return TCL_ERROR;
 }
@@ -205,7 +205,7 @@ TkOrientParseProc(
     Tcl_SetObjResult(interp, Tcl_ObjPrintf(
 	    "bad orientation \"%s\": must be vertical or horizontal",
 	    value));
-    Tcl_SetErrorCode(interp, "TK", "VALUE", "ORIENTATION", NULL);
+    Tcl_SetErrorCode(interp, "TK", "VALUE", "ORIENTATION", (char *)NULL);
     *orientPtr = 0;
     return TCL_ERROR;
 }
@@ -396,7 +396,7 @@ TkOffsetParseProc(
     }
     Tcl_AppendToObj(msgObj, ", n, ne, e, se, s, sw, w, nw, or center", TCL_INDEX_NONE);
     Tcl_SetObjResult(interp, msgObj);
-    Tcl_SetErrorCode(interp, "TK", "VALUE", "OFFSET", NULL);
+    Tcl_SetErrorCode(interp, "TK", "VALUE", "OFFSET", (char *)NULL);
     return TCL_ERROR;
 }
 
@@ -495,7 +495,7 @@ TkPixelParseProc(
     if ((result == TCL_OK) && (clientData == NULL) && (*doublePtr < 0.0)) {
 	Tcl_SetObjResult(interp, Tcl_ObjPrintf(
 		"expected screen distance but got \"%.50s\"", value));
-	Tcl_SetErrorCode(interp, "TK", "VALUE", "PIXELS", NULL);
+	Tcl_SetErrorCode(interp, "TK", "VALUE", "PIXELS", (char *)NULL);
 	return TCL_ERROR;
     }
     return result;
@@ -622,6 +622,70 @@ Tk_DrawFocusHighlight(
 /*
  *----------------------------------------------------------------------
  *
+ * TkDrawDottedRect --
+ *
+ *	This function draws a dotted rectangle, used as focus ring of Ttk
+ *	widgets and for rendering the active element of a listbox.
+ *
+ * Results:
+ *	None.
+ *
+ * Side effects:
+ *	A dotted rectangle is drawn in the specified Drawable.  On the
+ *	windowing systems x11 and aqua the GC components line_style,
+ *	line_width, dashes, and dash_offset are modified as needed.
+ *
+ *----------------------------------------------------------------------
+ */
+
+void
+TkDrawDottedRect(
+    Display *disp,		/* Display containing the dotted rectangle. */
+    Drawable d,			/* Where to draw the rectangle (typically a
+				 * pixmap for double buffering). */
+    GC gc,			/* Graphics context to use for drawing the
+				 * rectangle. */
+    int x, int y,		/* Coordinates of the top-left corner. */
+    int width, int height)	/* Width & height, _including the border_. */
+{
+#ifdef _WIN32
+    TkWinDrawDottedRect(disp, d, gc->foreground, x, y, width, height);
+
+#else
+    XGCValues gcValues;
+    int widthMod2 = width % 2, heightMod2 = height % 2;
+    int x2 = x + width - 1, y2 = y + height - 1;
+
+    gcValues.line_style = LineOnOffDash;
+    gcValues.line_width = 1;
+    gcValues.dashes = 1;
+#ifdef MAC_OSX_TK
+    gcValues.dash_offset = 1;
+#else
+    gcValues.dash_offset = 0;
+#endif
+    XChangeGC(disp, gc, GCLineStyle | GCLineWidth | GCDashList | GCDashOffset,
+	    &gcValues);
+
+    if (widthMod2 == 0 && heightMod2 == 0) {
+	XDrawLine(disp, d, gc, x+1, y,  x2-1, y);	/* N */
+	XDrawLine(disp, d, gc, x+2, y2, x2,   y2);	/* S */
+	XDrawLine(disp, d, gc, x,  y+2, x,  y2);	/* W */
+	XDrawLine(disp, d, gc, x2, y+1, x2, y2-1);	/* E */
+    } else {
+	int dx = 1 - widthMod2, dy = 1 - heightMod2;
+
+	XDrawLine(disp, d, gc, x+1, y,  x2-dx, y);	/* N */
+	XDrawLine(disp, d, gc, x+1, y2, x2-dx, y2);	/* S */
+	XDrawLine(disp, d, gc, x,  y+1, x,  y2-dy);	/* W */
+	XDrawLine(disp, d, gc, x2, y+1, x2, y2-dy);	/* E */
+    }
+#endif
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
  * Tk_GetScrollInfo --
  *
  *	This function is invoked to parse "xview" and "yview" scrolling
@@ -661,7 +725,7 @@ Tk_GetScrollInfo(
 	    Tcl_SetObjResult(interp, Tcl_ObjPrintf(
 		    "wrong # args: should be \"%s %s %s\"",
 		    argv[0], argv[1], "moveto fraction"));
-	    Tcl_SetErrorCode(interp, "TCL", "WRONGARGS", NULL);
+	    Tcl_SetErrorCode(interp, "TCL", "WRONGARGS", (char *)NULL);
 	    return TK_SCROLL_ERROR;
 	}
 	if (Tcl_GetDouble(interp, argv[3], dblPtr) != TCL_OK) {
@@ -675,7 +739,7 @@ Tk_GetScrollInfo(
 	    Tcl_SetObjResult(interp, Tcl_ObjPrintf(
 		    "wrong # args: should be \"%s %s %s\"",
 		    argv[0], argv[1], "scroll number pages|units"));
-	    Tcl_SetErrorCode(interp, "TCL", "WRONGARGS", NULL);
+	    Tcl_SetErrorCode(interp, "TCL", "WRONGARGS", (char *)NULL);
 	    return TK_SCROLL_ERROR;
 	}
 	if (Tcl_GetDouble(interp, argv[3], &d) != TCL_OK) {
@@ -692,13 +756,13 @@ Tk_GetScrollInfo(
 
 	Tcl_SetObjResult(interp, Tcl_ObjPrintf(
 		"bad argument \"%s\": must be pages or units", argv[4]));
-	Tcl_SetErrorCode(interp, "TK", "VALUE", "SCROLL_UNITS", NULL);
+	Tcl_SetErrorCode(interp, "TK", "VALUE", "SCROLL_UNITS", (char *)NULL);
 	return TK_SCROLL_ERROR;
     }
     Tcl_SetObjResult(interp, Tcl_ObjPrintf(
 	    "unknown option \"%s\": must be moveto or scroll", argv[2]));
     Tcl_SetErrorCode(interp, "TCL", "LOOKUP", "INDEX", "option", argv[2],
-	    NULL);
+	    (char *)NULL);
     return TK_SCROLL_ERROR;
 }
 
@@ -779,12 +843,12 @@ Tk_GetScrollInfoObj(
 
 	Tcl_SetObjResult(interp, Tcl_ObjPrintf(
 		"bad argument \"%s\": must be pages or units", arg));
-	Tcl_SetErrorCode(interp, "TK", "VALUE", "SCROLL_UNITS", NULL);
+	Tcl_SetErrorCode(interp, "TK", "VALUE", "SCROLL_UNITS", (char *)NULL);
 	return TK_SCROLL_ERROR;
     }
     Tcl_SetObjResult(interp, Tcl_ObjPrintf(
 	    "unknown option \"%s\": must be moveto or scroll", arg));
-    Tcl_SetErrorCode(interp, "TCL", "LOOKUP", "INDEX", "option", arg, NULL);
+    Tcl_SetErrorCode(interp, "TCL", "LOOKUP", "INDEX", "option", arg, (char *)NULL);
     return TK_SCROLL_ERROR;
 }
 
@@ -958,7 +1022,7 @@ TkFindStateNum(
 		    ((mPtr[1].strKey != NULL) ? "" : "or "), mPtr->strKey);
 	}
 	Tcl_SetObjResult(interp, msgObj);
-	Tcl_SetErrorCode(interp, "TK", "LOOKUP", option, strKey, NULL);
+	Tcl_SetErrorCode(interp, "TK", "LOOKUP", option, strKey, (char *)NULL);
     }
     return mPtr->numKey;
 }
@@ -1019,7 +1083,7 @@ TkFindStateNumObj(
 	}
 	Tcl_SetObjResult(interp, msgObj);
 	Tcl_SetErrorCode(interp, "TK", "LOOKUP", Tcl_GetString(optionPtr),
-		key, NULL);
+		key, (char *)NULL);
     }
     return mPtr->numKey;
 }
@@ -1154,7 +1218,7 @@ TkMakeEnsemble(
 	nameObj = Tcl_NewStringObj(map[i].name, TCL_INDEX_NONE);
 	fqdnObj = Tcl_NewStringObj(Tcl_DStringValue(&ds),
 		Tcl_DStringLength(&ds));
-	Tcl_AppendStringsToObj(fqdnObj, "::", map[i].name, NULL);
+	Tcl_AppendStringsToObj(fqdnObj, "::", map[i].name, (char *)NULL);
 	Tcl_DictObjPut(NULL, dictObj, nameObj, fqdnObj);
 	if (map[i].proc) {
 #if TCL_MAJOR_VERSION > 8

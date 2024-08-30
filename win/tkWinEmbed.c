@@ -281,7 +281,7 @@ Tk_UseWindow(
     if (!IsWindow(hwnd)) {
 	if (interp != NULL) {
 	    Tcl_SetObjResult(interp, Tcl_ObjPrintf(
-		    "window \"%s\" doesn't exist", string));
+		    "window \"%s\" does not exist", string));
 	    Tcl_SetErrorCode(interp, "TK", "EMBED", "EXIST", NULL);
 	}
 	return TCL_ERROR;
@@ -862,12 +862,12 @@ ContainerEventProc(
     if (eventPtr->type == ConfigureNotify) {
 
 	/*
-         * Send a ConfigureNotify  to the embedded application.
-         */
+	 * Send a ConfigureNotify  to the embedded application.
+	 */
 
-        if (containerPtr->embeddedPtr != NULL) {
-            TkDoConfigureNotify(containerPtr->embeddedPtr);
-        }
+	if (containerPtr->embeddedPtr != NULL) {
+	    TkDoConfigureNotify(containerPtr->embeddedPtr);
+	}
 
 	/*
 	 * Resize the embedded window, if there is any.

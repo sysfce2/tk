@@ -229,7 +229,6 @@ typedef struct
     Tcl_Obj *borderWidthObj;
     Tcl_Obj *reliefObj;
     Tcl_Obj *anchorObj;
-    Tcl_Obj *justifyObj;
     Tcl_Obj *wrapLengthObj;
 } LabelPart;
 
@@ -260,9 +259,6 @@ static const Tk_OptionSpec LabelOptionSpecs[] =
     {TK_OPTION_ANCHOR, "-anchor", "anchor", "Anchor",
 	"w", offsetof(Label,label.anchorObj), TCL_INDEX_NONE,
 	0, 0, GEOMETRY_CHANGED},
-    {TK_OPTION_JUSTIFY, "-justify", "justify", "Justify",
-	"left", offsetof(Label, label.justifyObj), TCL_INDEX_NONE,
-	0,0,GEOMETRY_CHANGED },
     {TK_OPTION_PIXELS, "-wraplength", "wrapLength", "WrapLength",
 	NULL, offsetof(Label, label.wrapLengthObj), TCL_INDEX_NONE,
 	TK_OPTION_NULL_OK,0,GEOMETRY_CHANGED /*SB: SIZE_CHANGED*/ },
@@ -408,7 +404,7 @@ TTK_BEGIN_LAYOUT(ButtonLayout)
     TTK_GROUP("Button.border", TTK_FILL_BOTH|TTK_BORDER,
 	TTK_GROUP("Button.focus", TTK_FILL_BOTH,
 	    TTK_GROUP("Button.padding", TTK_FILL_BOTH,
-	        TTK_NODE("Button.label", TTK_FILL_BOTH))))
+		TTK_NODE("Button.label", TTK_FILL_BOTH))))
 TTK_END_LAYOUT
 
 /*------------------------------------------------------------------------
@@ -509,11 +505,11 @@ CheckbuttonConfigure(Tcl_Interp *interp, void *recordPtr, int mask)
     Ttk_TraceHandle *vt = NULL;
 
     if (varName != NULL && *Tcl_GetString(varName) != '\0') {
-        vt = Ttk_TraceVariable(interp, varName,
+	vt = Ttk_TraceVariable(interp, varName,
 	    CheckbuttonVariableChanged, checkPtr);
-        if (!vt) {
+	if (!vt) {
 	    return TCL_ERROR;
-        }
+	}
     }
 
     if (BaseConfigure(interp, recordPtr, mask) != TCL_OK){
@@ -522,7 +518,7 @@ CheckbuttonConfigure(Tcl_Interp *interp, void *recordPtr, int mask)
     }
 
     if (checkPtr->checkbutton.variableTrace) {
-        Ttk_UntraceVariable(checkPtr->checkbutton.variableTrace);
+	Ttk_UntraceVariable(checkPtr->checkbutton.variableTrace);
     }
     checkPtr->checkbutton.variableTrace = vt;
 
@@ -570,11 +566,11 @@ CheckbuttonInvokeCommand(
 	newValue = checkPtr->checkbutton.onValueObj;
 
     if (checkPtr->checkbutton.variableObj == NULL ||
-        *Tcl_GetString(checkPtr->checkbutton.variableObj) == '\0')
-        CheckbuttonVariableChanged(checkPtr, Tcl_GetString(newValue));
+	*Tcl_GetString(checkPtr->checkbutton.variableObj) == '\0')
+	CheckbuttonVariableChanged(checkPtr, Tcl_GetString(newValue));
     else if (Tcl_ObjSetVar2(interp,
-	        checkPtr->checkbutton.variableObj, NULL, newValue,
-	        TCL_GLOBAL_ONLY|TCL_LEAVE_ERR_MSG)
+		checkPtr->checkbutton.variableObj, NULL, newValue,
+		TCL_GLOBAL_ONLY|TCL_LEAVE_ERR_MSG)
 	    == NULL)
 	return TCL_ERROR;
 
@@ -863,7 +859,7 @@ TTK_BEGIN_LAYOUT(MenubuttonLayout)
 	TTK_GROUP("Menubutton.focus", TTK_FILL_BOTH,
 	    TTK_NODE("Menubutton.indicator", TTK_PACK_RIGHT)
 	    TTK_GROUP("Menubutton.padding", TTK_FILL_X,
-	        TTK_NODE("Menubutton.label", TTK_PACK_LEFT))))
+		TTK_NODE("Menubutton.label", TTK_PACK_LEFT))))
 TTK_END_LAYOUT
 
 /*------------------------------------------------------------------------

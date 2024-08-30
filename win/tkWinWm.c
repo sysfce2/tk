@@ -1436,11 +1436,6 @@ ReadIconOrCursorFromFile(
 	Tcl_Close(NULL, channel);
 	return NULL;
     }
-    if (Tcl_SetChannelOption(interp, channel, "-encoding", "binary")
-	    != TCL_OK) {
-	Tcl_Close(NULL, channel);
-	return NULL;
-    }
 
     /*
      * Allocate memory for the resource structure
@@ -2466,6 +2461,41 @@ TkpWmGetState(
  *--------------------------------------------------------------
  */
 
+static void CheckForPointer(TkWindow *winPtr)
+{
+    if (winPtr == NULL || winPtr->mainPtr == NULL) {
+	/*
+	 * Bug [d233f01e2a] - clipboard clean up after main window destroyed
+	 * Nothing to do.
+	 */
+	return;
+    }
+
+    POINT mouse;
+    int x, y;
+    unsigned int state = TkWinGetModifierState();
+    TkWindow **windows = TkWmStackorderToplevel(winPtr->mainPtr->winPtr);
+    TkWindow **w;
+    TkGetPointerCoords(NULL, &x, &y);
+    mouse.x = x;
+    mouse.y = y;
+    if (windows != NULL) {
+	for (w = windows; *w ; w++) {
+	    RECT windowRect;
+	    HWND hwnd = Tk_GetHWND(Tk_WindowId((Tk_Window) *w));
+	    if (GetWindowRect(hwnd, &windowRect) == 0) {
+		continue;
+	    }
+	    if (winPtr != *w && PtInRect(&windowRect, mouse)) {
+		Tk_Window target = Tk_CoordsToWindow(x, y, (Tk_Window) *w);
+		Tk_UpdatePointer((Tk_Window) target, x, y, state);
+		break;
+	    }
+	}
+	ckfree(windows);
+    }
+}
+
 void
 TkWmDeadWindow(
     TkWindow *winPtr)		/* Top-level window that's being deleted. */
@@ -2604,6 +2634,13 @@ TkWmDeadWindow(
 	DecrIconRefCount(wmPtr->iconPtr);
     }
 
+    /*
+     * Check if the dead window is a toplevel containing the pointer.  If so,
+     * find the window which will inherit the pointer and call
+     * TkUpdatePointer.
+     */
+
+    CheckForPointer(winPtr);
     ckfree(wmPtr);
     winPtr->wmInfoPtr = NULL;
 }
@@ -6594,8 +6631,6 @@ TkWmStackorderToplevelEnumProc(
 
     TkWmStackorderToplevelPair *pair =
 	    (TkWmStackorderToplevelPair *) lParam;
-
-    /*fprintf(stderr, "Looking up HWND %d\n", hwnd);*/
 
     hPtr = Tcl_FindHashEntry(pair->table, hwnd);
     if (hPtr != NULL) {

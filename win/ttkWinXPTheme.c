@@ -19,14 +19,14 @@
 #include <windows.h>
 #include <uxtheme.h>
 #include <vssym32.h>
-#include "ttk/ttkTheme.h"
+#include "ttk/ttkThemeInt.h"
 
 typedef HTHEME  (STDAPICALLTYPE OpenThemeDataProc)(HWND hwnd,
 		 LPCWSTR pszClassList);
 typedef HRESULT (STDAPICALLTYPE CloseThemeDataProc)(HTHEME hTheme);
 typedef HRESULT (STDAPICALLTYPE DrawThemeBackgroundProc)(HTHEME hTheme,
-                 HDC hdc, int iPartId, int iStateId, const RECT *pRect,
-                 OPTIONAL const RECT *pClipRect);
+		 HDC hdc, int iPartId, int iStateId, const RECT *pRect,
+		 OPTIONAL const RECT *pClipRect);
 typedef HRESULT (STDAPICALLTYPE DrawThemeEdgeProc)(HTHEME hTheme,
 		 HDC hdc, int iPartId, int iStateId, const RECT *pDestRect,
 		 unsigned int uEdge, unsigned int uFlags,
@@ -805,7 +805,7 @@ static void TabElementDraw(
 	return;
 
     if (nbTabsStickBit == TTK_STICK_S) {
-	if (state & TTK_STATE_USER1) {
+	if (state & TTK_STATE_FIRST) {
 	    partId = TABP_TABITEMLEFTEDGE;
 	}
 
@@ -866,9 +866,6 @@ static const Ttk_ElementSpec TabElementSpec =
  *	Generic element, but don't display at all if TTK_STATE_LEAF (=USER2) set
  */
 
-#define TTK_STATE_OPEN TTK_STATE_USER1
-#define TTK_STATE_LEAF TTK_STATE_USER2
-
 static const Ttk_StateTable header_statemap[] =
 {
     { HIS_PRESSED, 	TTK_STATE_PRESSED, 0 },
@@ -895,7 +892,7 @@ static void TreeIndicatorElementDraw(
     Drawable d, Ttk_Box b, Ttk_State state)
 {
     if (!(state & TTK_STATE_LEAF)) {
-        GenericElementDraw(clientData,elementRecord,tkwin,d,b,state);
+	GenericElementDraw(clientData,elementRecord,tkwin,d,b,state);
     }
 }
 
@@ -1034,7 +1031,7 @@ TTK_LAYOUT("TMenubutton",
     TTK_NODE("Menubutton.dropdown", TTK_PACK_RIGHT|TTK_FILL_Y)
     TTK_GROUP("Menubutton.button", TTK_FILL_BOTH,
 	    TTK_GROUP("Menubutton.padding", TTK_FILL_X,
-	        TTK_NODE("Menubutton.label", 0))))
+		TTK_NODE("Menubutton.label", 0))))
 
 TTK_LAYOUT("Horizontal.TScrollbar",
     TTK_GROUP("Horizontal.Scrollbar.trough", TTK_FILL_X,
@@ -1412,7 +1409,7 @@ TtkXPTheme_Init(Tcl_Interp *interp, HWND hwnd)
     themePtr = Ttk_CreateTheme(interp, "xpnative", parentPtr);
 
     if (!themePtr)
-        return TCL_ERROR;
+	return TCL_ERROR;
 
     /*
      * Set theme data and cleanup proc

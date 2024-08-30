@@ -10,7 +10,7 @@ exec wish "$0" ${1+"$@"}
 # separate ".tcl" files is this directory, which are sourced by this script as
 # needed.
 
-package require tk
+package require tk	8.7-
 package require msgcat
 
 destroy {*}[winfo children .]
@@ -142,7 +142,7 @@ if {[tk windowingsystem] ne "aqua"} {
 	    -command {tkAboutDialog} -accelerator [mc "<F1>"]
     bind . <F1> {tkAboutDialog}
     .menuBar.file add sep
-    if {[string match win* [tk windowingsystem]]} {
+    if {[tk windowingsystem] eq "win32"} {
 	# Windows doesn't usually have a Meta key
 	::tk::AmpMenuArgs .menuBar.file add command -label [mc "&Quit"] \
 		-command {exit} -accelerator [mc "Ctrl+Q"]

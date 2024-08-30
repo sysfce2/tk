@@ -30,7 +30,7 @@
  */
 
 #include "tkMacOSXPrivate.h"
-#include "ttk/ttkTheme.h"
+#include "ttk/ttkThemeInt.h"
 #include "ttkMacOSXTheme.h"
 #include "tkColor.h"
 #include <math.h>
@@ -214,9 +214,9 @@ static GrayPalette LookupGrayPalette(
 {
     const PaletteStateTable *entry = design->palettes;
     while ((state & entry->onBits) != entry->onBits ||
-           (~state & entry->offBits) != entry->offBits)
+	   (~state & entry->offBits) != entry->offBits)
     {
-        ++entry;
+	++entry;
     }
     return isDark ? entry->dark : entry->light;
 }
@@ -356,12 +356,12 @@ static void GetBackgroundColorRGBA(
 		rgba[i] -= Ttk_ContrastDelta*contrast / 255.0;
 	    }
 	}
-        if (save && winPtr->privatePtr) {
-            winPtr->privatePtr->flags |= TTK_HAS_CONTRASTING_BG;
-            for (int i = 0; i < 4; i++) {
-                winPtr->privatePtr->fillRGBA[i] = rgba[i];
-            }
-        }
+	if (save && winPtr->privatePtr) {
+	    winPtr->privatePtr->flags |= TTK_HAS_CONTRASTING_BG;
+	    for (int i = 0; i < 4; i++) {
+		winPtr->privatePtr->fillRGBA[i] = rgba[i];
+	    }
+	}
     }
 }
 
@@ -931,8 +931,8 @@ DrawHelpSymbol(
     NSColor *foreground = state & TTK_STATE_DISABLED ?
 	[NSColor disabledControlTextColor] : [NSColor controlTextColor];
     NSDictionary *attrs = @{
-        NSForegroundColorAttributeName : foreground,
-        NSFontAttributeName : font
+	NSForegroundColorAttributeName : foreground,
+	NSFontAttributeName : font
     };
     NSAttributedString *attributedString = [[NSAttributedString alloc]
 						      initWithString:@"?"
@@ -1488,11 +1488,11 @@ DrawTab(
 
     CGContextClipToRect(context, bounds);
     if (OSVersion < 110000 || !(state & TTK_STATE_SELECTED)) {
-	if (!(state & TTK_STATE_FIRST_TAB)) {
+	if (!(state & TTK_STATE_FIRST)) {
 	    bounds.origin.x -= 10;
 	    bounds.size.width += 10;
 	}
-	if (!(state & TTK_STATE_LAST_TAB)) {
+	if (!(state & TTK_STATE_LAST)) {
 	    bounds.size.width += 10;
 	}
     }
@@ -1505,12 +1505,12 @@ DrawTab(
     if (!(state & TTK_STATE_SELECTED)) {
 	DrawGrayButton(context, bounds, &tabDesign, state, tkwin);
 
-        /*
-         * Draw a separator line on the left side of the tab if it
-         * not first.
-         */
+	/*
+	 * Draw a separator line on the left side of the tab if it
+	 * not first.
+	 */
 
-	if (!(state & TTK_STATE_FIRST_TAB)) {
+	if (!(state & TTK_STATE_FIRST)) {
 	    CGContextSaveGState(context);
 	    strokeColor = CGColorFromGray(darkTabSeparator);
 	    CGContextSetStrokeColorWithColor(context, strokeColor);
@@ -1530,7 +1530,7 @@ DrawTab(
 	 * (The selected tab is always drawn last.)
 	 */
 
-	if ((state & TTK_STATE_FIRST_TAB) && !(state & TTK_STATE_LAST_TAB)) {
+	if ((state & TTK_STATE_FIRST) && !(state & TTK_STATE_LAST)) {
 	    bounds.size.width += 1;
 	}
 	if (!(state & TTK_STATE_BACKGROUND)) {
@@ -1559,12 +1559,12 @@ DrawTab11(
 	 * rounded rectangle behind the entire tab bar.
 	 */
 
-	if (!(state & TTK_STATE_FIRST_TAB)) {
+	if (!(state & TTK_STATE_FIRST)) {
 	    clipRect.origin.x -= 5;
 	    bounds.origin.x -= 5;
 	    bounds.size.width += 5;
 	}
-	if (!(state & TTK_STATE_LAST_TAB)) {
+	if (!(state & TTK_STATE_LAST)) {
 	    clipRect.size.width += 5;
 	    bounds.size.width += 5;
 	}
@@ -1653,20 +1653,20 @@ static void ButtonElementMinSize(
     if (params->heightMetric != NoThemeMetric) {
 	ChkErr(GetThemeMetric, params->heightMetric, minHeight);
 
-        /*
-         * The theme height does not include the 1-pixel border around
-         * the button, although it does include the 1-pixel shadow at
-         * the bottom.
-         */
+	/*
+	 * The theme height does not include the 1-pixel border around
+	 * the button, although it does include the 1-pixel shadow at
+	 * the bottom.
+	 */
 
 	*minHeight += 2;
 
-        /*
-         * For buttons with labels the minwidth must be 0 to force the
-         * correct text layout.  For example, a non-zero value will cause the
-         * text to be left justified, no matter what -anchor setting is used in
-         * the style.
-         */
+	/*
+	 * For buttons with labels the minwidth must be 0 to force the
+	 * correct text layout.  For example, a non-zero value will cause the
+	 * text to be left justified, no matter what -anchor setting is used in
+	 * the style.
+	 */
 
 	if (params->widthMetric != NoThemeMetric) {
 	    ChkErr(GetThemeMetric, params->widthMetric, minWidth);
@@ -1700,10 +1700,10 @@ static void ButtonElementSize(
 	return;
     case TkGradientButton:
 	*paddingPtr = Ttk_MakePadding(1, 1, 1, 1);
-        /* Fall through. */
+	/* Fall through. */
     case kThemeArrowButton:
     case kThemeRoundButtonHelp:
-        return;
+	return;
 	/* Buttons which are sized like PushButtons but unknown to HITheme. */
     case TkRoundedRectButton:
     case TkRecessedButton:
@@ -1711,7 +1711,7 @@ static void ButtonElementSize(
 	info.kind = kThemePushButton;
 	break;
     default:
-        break;
+	break;
     }
 
     /*
@@ -1874,15 +1874,15 @@ static const Ttk_StateTable TabStyleTable[] = {
     {kThemeTabNonFront, 0, 0}
 };
 static const Ttk_StateTable TabAdornmentTable[] = {
-    {kHIThemeTabAdornmentNone, TTK_STATE_FIRST_TAB | TTK_STATE_LAST_TAB, 0},
-    {kHIThemeTabAdornmentTrailingSeparator, TTK_STATE_FIRST_TAB, 0},
-    {kHIThemeTabAdornmentNone, TTK_STATE_LAST_TAB, 0},
+    {kHIThemeTabAdornmentNone, TTK_STATE_FIRST | TTK_STATE_LAST, 0},
+    {kHIThemeTabAdornmentTrailingSeparator, TTK_STATE_FIRST, 0},
+    {kHIThemeTabAdornmentNone, TTK_STATE_LAST, 0},
     {kHIThemeTabAdornmentTrailingSeparator, 0, 0},
 };
 static const Ttk_StateTable TabPositionTable[] = {
-    {kHIThemeTabPositionOnly, TTK_STATE_FIRST_TAB | TTK_STATE_LAST_TAB, 0},
-    {kHIThemeTabPositionFirst, TTK_STATE_FIRST_TAB, 0},
-    {kHIThemeTabPositionLast, TTK_STATE_LAST_TAB, 0},
+    {kHIThemeTabPositionOnly, TTK_STATE_FIRST | TTK_STATE_LAST, 0},
+    {kHIThemeTabPositionFirst, TTK_STATE_FIRST, 0},
+    {kHIThemeTabPositionLast, TTK_STATE_LAST, 0},
     {kHIThemeTabPositionMiddle, 0, 0},
 };
 
@@ -2152,14 +2152,14 @@ static void EntryElementDraw(
 	    .isFocused = state & TTK_STATE_FOCUS,
 	};
 
-        /*
-         * Earlier versions of the Aqua theme ignored the -fieldbackground
-         * option and used the -background as if it were -fieldbackground.
-         * Here we are enabling -fieldbackground.  For backwards
-         * compatibility, if -fieldbackground is set to the default color and
-         * -background is set to a different color then we use -background as
-         * -fieldbackground.
-         */
+	/*
+	 * Earlier versions of the Aqua theme ignored the -fieldbackground
+	 * option and used the -background as if it were -fieldbackground.
+	 * Here we are enabling -fieldbackground.  For backwards
+	 * compatibility, if -fieldbackground is set to the default color and
+	 * -background is set to a different color then we use -background as
+	 * -fieldbackground.
+	 */
 
 	if (0 != strcmp(Tcl_GetString(e->fieldbackgroundObj), defaultBG)) {
 	    backgroundPtr =
@@ -2828,14 +2828,14 @@ static void ThumbElementDraw(
 	CGRect troughBounds = {{macWin->xOff, macWin->yOff},
 			       {Tk_Width(tkwin), Tk_Height(tkwin)}};
 
-        /*
-         * The info struct has integer fields, which will be converted to
-         * floats in the drawing routine.  All of values provided in the info
-         * struct, namely min, max, value, and viewSize are only defined up to
-         * an arbitrary scale factor.  To avoid roundoff error we scale so
-         * that the viewSize is a large float which is smaller than the
-         * largest int.
-         */
+	/*
+	 * The info struct has integer fields, which will be converted to
+	 * floats in the drawing routine.  All of values provided in the info
+	 * struct, namely min, max, value, and viewSize are only defined up to
+	 * an arbitrary scale factor.  To avoid roundoff error we scale so
+	 * that the viewSize is a large float which is smaller than the
+	 * largest int.
+	 */
 
 	HIThemeTrackDrawInfo info = {
 	    .version = 0,
@@ -2941,7 +2941,7 @@ static void SeparatorElementDraw(
     CGRect bounds = BoxToRect(d, b);
     const HIThemeSeparatorDrawInfo info = {
 	.version = 0,
-        /* Separator only supports kThemeStateActive, kThemeStateInactive */
+	/* Separator only supports kThemeStateActive, kThemeStateInactive */
 	.state = Ttk_StateTableLookup(ThemeStateTable,
 	    state & TTK_STATE_BACKGROUND),
     };
@@ -3004,7 +3004,7 @@ static void SizegripElementDraw(
     CGRect bounds = BoxToRect(d, b);
     HIThemeGrowBoxDrawInfo info = {
 	.version = 0,
-        /* Grow box only supports kThemeStateActive, kThemeStateInactive */
+	/* Grow box only supports kThemeStateActive, kThemeStateInactive */
 	.state = Ttk_StateTableLookup(ThemeStateTable,
 	    state & TTK_STATE_BACKGROUND),
 	.kind = kHIThemeGrowBoxKindNormal,
@@ -3295,10 +3295,10 @@ static void TreeHeaderElementDraw(
     BEGIN_DRAWING(d)
     if ([NSApp macOSVersion] > 100800) {
 
-        /*
-         * Compensate for the padding added in TreeHeaderElementSize, so
-         * the larger heading will be drawn at the top of the widget.
-         */
+	/*
+	 * Compensate for the padding added in TreeHeaderElementSize, so
+	 * the larger heading will be drawn at the top of the widget.
+	 */
 
 	bounds.origin.y -= 4;
 	DrawListHeader(bounds, dc.context, tkwin, state);
@@ -3321,10 +3321,8 @@ static Ttk_ElementSpec TreeHeaderElementSpec = {
  * +++ Disclosure triangles --
  */
 
-#define TTK_TREEVIEW_STATE_OPEN         TTK_STATE_USER1
-#define TTK_TREEVIEW_STATE_LEAF         TTK_STATE_USER2
 static const Ttk_StateTable DisclosureValueTable[] = {
-    {kThemeDisclosureDown, TTK_TREEVIEW_STATE_OPEN, 0},
+    {kThemeDisclosureDown, TTK_STATE_OPEN, 0},
     {kThemeDisclosureRight, 0, 0},
 };
 static void DisclosureElementSize(
@@ -3351,7 +3349,7 @@ static void DisclosureElementDraw(
     Ttk_Box b,
     Ttk_State state)
 {
-    if (!(state & TTK_TREEVIEW_STATE_LEAF)) {
+    if (!(state & TTK_STATE_LEAF)) {
 	int triangleState = TkMacOSXInDarkMode(tkwin) ?
 	    kThemeStateInactive : kThemeStateActive;
 	CGRect bounds = BoxToRect(d, b);
@@ -3370,7 +3368,7 @@ static void DisclosureElementDraw(
 	    NSColor *stroke = [[NSColor textColor]
 		colorUsingColorSpace: deviceRGB];
 	    [stroke getComponents: rgba];
-	    if (state & TTK_TREEVIEW_STATE_OPEN) {
+	    if (state & TTK_STATE_OPEN) {
 		DrawOpenDisclosure(dc.context, bounds, 2, 8, rgba);
 	    } else {
 		DrawClosedDisclosure(dc.context, bounds, 2, 12, rgba);
@@ -3486,13 +3484,13 @@ TTK_LAYOUT("TSpinbox",
 
 TTK_LAYOUT("TEntry",
     TTK_GROUP("Entry.field", TTK_FILL_BOTH|TTK_BORDER,
-        TTK_GROUP("Entry.padding", TTK_FILL_BOTH,
+	TTK_GROUP("Entry.padding", TTK_FILL_BOTH,
 	    TTK_NODE("Entry.textarea", TTK_FILL_BOTH))))
 
 /* Searchbox */
 TTK_LAYOUT("Searchbox",
     TTK_GROUP("Searchbox.field", TTK_FILL_BOTH|TTK_BORDER,
-        TTK_GROUP("Entry.padding", TTK_FILL_BOTH,
+	TTK_GROUP("Entry.padding", TTK_FILL_BOTH,
 	    TTK_NODE("Entry.textarea", TTK_FILL_BOTH))))
 
 /* Progress bars -- track only */

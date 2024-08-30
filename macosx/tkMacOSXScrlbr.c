@@ -262,7 +262,6 @@ TkpDisplayScrollbar(
     NSView *view = TkMacOSXGetNSViewForDrawable(macWin);
 
     if ((view == NULL)
-	    || (macWin->flags & TK_DO_NOT_DRAW)
 	    || !TkMacOSXSetupDrawingContext((Drawable)macWin, NULL, &dc)) {
 	return;
     }
@@ -284,7 +283,7 @@ TkpDisplayScrollbar(
      * Draw a 3D rectangle to provide a base for the native scrollbar.
      */
 
-    if (scrollPtr->highlightWidth != 0) {
+    if (scrollPtr->highlightWidth > 0) {
     	GC fgGC, bgGC;
 
     	bgGC = Tk_GCForColor(scrollPtr->highlightBgColorPtr, (Pixmap) macWin);
@@ -649,8 +648,8 @@ UpdateControlValues(
 	    || height <= metrics.minHeight) {
     	msPtr->info.enableState = kThemeTrackHideTrack;
     } else {
-        msPtr->info.enableState = kThemeTrackActive;
-    	msPtr->info.attributes =
+	msPtr->info.enableState = kThemeTrackActive;
+	msPtr->info.attributes =
 		kThemeTrackShowThumb | kThemeTrackThumbRgnIsNotGhost;
     }
 }

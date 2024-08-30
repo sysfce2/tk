@@ -157,7 +157,7 @@ static int ConfigurePane(
      */
     if (pane->weight < 0) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-		"-weight must be nonnegative", -1));
+		"-weight must be non-negative", -1));
 	Tcl_SetErrorCode(interp, "TTK", "PANE", "WEIGHT", NULL);
 	goto error;
     }
@@ -667,7 +667,7 @@ static int PanedInsertCommand(
     }
 
     if (TCL_OK != Ttk_GetContentIndexFromObj(
-		interp,pw->paned.mgr, objv[2], &destIndex))
+		interp,pw->paned.mgr, objv[2], 1, &destIndex))
     {
 	return TCL_ERROR;
     }
@@ -702,7 +702,7 @@ static int PanedForgetCommand(
     }
 
     if (TCL_OK != Ttk_GetContentIndexFromObj(
-		    interp, pw->paned.mgr, objv[2], &paneIndex))
+		    interp, pw->paned.mgr, objv[2], 0, &paneIndex))
     {
 	return TCL_ERROR;
     } else if (paneIndex >= Ttk_NumberContent(pw->paned.mgr)) {
@@ -783,7 +783,7 @@ static int PanedPaneCommand(
     }
 
     if (TCL_OK != Ttk_GetContentIndexFromObj(
-		    interp,pw->paned.mgr, objv[2], &paneIndex))
+		    interp,pw->paned.mgr, objv[2], 0, &paneIndex))
     {
 	return TCL_ERROR;
     } else if (paneIndex >= Ttk_NumberContent(pw->paned.mgr)) {

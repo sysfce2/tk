@@ -1040,7 +1040,7 @@ typedef struct {
 
 static const Ttk_ElementOptionSpec ThumbElementOptions[] = {
     { "-width", TK_OPTION_PIXELS, offsetof(ThumbElement,sizeObj),
-        STRINGIFY(SCROLLBAR_WIDTH) },
+	STRINGIFY(SCROLLBAR_WIDTH) },
     { "-background", TK_OPTION_BORDER, offsetof(ThumbElement,borderObj),
 	DEFAULT_BACKGROUND },
     { "-bordercolor", TK_OPTION_COLOR, offsetof(ThumbElement,borderColorObj),
@@ -1207,9 +1207,6 @@ static const Ttk_ElementSpec SliderElementSpec = {
 /*------------------------------------------------------------------------
  * +++ Tree indicator element.
  */
-
-#define TTK_STATE_OPEN TTK_STATE_USER1		/* XREF: treeview.c */
-#define TTK_STATE_LEAF TTK_STATE_USER2
 
 typedef struct {
     Tcl_Obj *colorObj;

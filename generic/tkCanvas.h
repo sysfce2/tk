@@ -60,11 +60,11 @@ typedef struct TkCanvas {
      * Information used when displaying widget:
      */
 
-    int borderWidth;		/* Width of 3-D border around window. */
+    Tcl_Obj *borderWidthObj;	/* Width of 3-D border around window. */
     Tk_3DBorder bgBorder;	/* Used for canvas background. */
     int relief;			/* Indicates whether window as a whole is
 				 * raised, sunken, or flat. */
-    int highlightWidth;		/* Width in pixels of highlight to draw around
+    Tcl_Obj *highlightWidthObj;	/* Width in pixels of highlight to draw around
 				 * widget when it has the focus. <= 0 means
 				 * don't draw a highlight. */
     XColor *highlightBgColorPtr;
@@ -241,7 +241,7 @@ typedef struct TkCanvas {
  *
  * REDRAW_PENDING -		1 means a DoWhenIdle handler has already been
  *				created to redraw some or all of the canvas.
- * REDRAW_BORDERS - 		1 means that the borders need to be redrawn
+ * REDRAW_BORDERS -		1 means that the borders need to be redrawn
  *				during the next redisplay operation.
  * REPICK_NEEDED -		1 means DisplayCanvas should pick a new
  *				current item before redrawing the canvas.
@@ -292,7 +292,7 @@ typedef struct TkCanvas {
 
 MODULE_SCOPE int	TkCanvPostscriptObjCmd(TkCanvas *canvasPtr,
 			    Tcl_Interp *interp, Tcl_Size argc, Tcl_Obj *const objv[]);
-MODULE_SCOPE int 	TkCanvTranslatePath(TkCanvas *canvPtr,
+MODULE_SCOPE int	TkCanvTranslatePath(TkCanvas *canvPtr,
 			    int numVertex, double *coordPtr, int closed,
 			    XPoint *outPtr);
 /*

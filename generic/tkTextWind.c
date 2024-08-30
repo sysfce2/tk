@@ -96,13 +96,13 @@ static const char *const alignStrings[] = {
 static const Tk_OptionSpec optionSpecs[] = {
     {TK_OPTION_STRING_TABLE, "-align", NULL, NULL,
 	"center", TCL_INDEX_NONE, offsetof(TkTextEmbWindow, align),
-	TK_OPTION_ENUM_VAR, alignStrings, 0},
+	(TCL_MAJOR_VERSION > 8) ? TK_OPTION_ENUM_VAR : 0, alignStrings, 0},
     {TK_OPTION_STRING, "-create", NULL, NULL,
 	NULL, TCL_INDEX_NONE, offsetof(TkTextEmbWindow, create), TK_OPTION_NULL_OK, 0, 0},
     {TK_OPTION_PIXELS, "-padx", NULL, NULL,
-	"0", TCL_INDEX_NONE, offsetof(TkTextEmbWindow, padX), 0, 0, 0},
+	"0", offsetof(TkTextEmbWindow, padXObj), offsetof(TkTextEmbWindow, padX), 0, 0, 0},
     {TK_OPTION_PIXELS, "-pady", NULL, NULL,
-	"0", TCL_INDEX_NONE, offsetof(TkTextEmbWindow, padY), 0, 0, 0},
+	"0", offsetof(TkTextEmbWindow, padYObj), offsetof(TkTextEmbWindow, padY), 0, 0, 0},
     {TK_OPTION_BOOLEAN, "-stretch", NULL, NULL,
 	"0", TCL_INDEX_NONE, offsetof(TkTextEmbWindow, stretch), 0, 0, 0},
     {TK_OPTION_WINDOW, "-window", NULL, NULL,
@@ -171,7 +171,7 @@ TkTextWindowCmd(
 	    Tcl_SetObjResult(interp, Tcl_ObjPrintf(
 		    "no embedded window at index \"%s\"",
 		    Tcl_GetString(objv[3])));
-	    Tcl_SetErrorCode(interp, "TK", "TEXT", "NO_WINDOW", NULL);
+	    Tcl_SetErrorCode(interp, "TK", "TEXT", "NO_WINDOW", (char *)NULL);
 	    return TCL_ERROR;
 	}
 
@@ -209,7 +209,7 @@ TkTextWindowCmd(
 	    Tcl_SetObjResult(interp, Tcl_ObjPrintf(
 		    "no embedded window at index \"%s\"",
 		    Tcl_GetString(objv[3])));
-	    Tcl_SetErrorCode(interp, "TK", "TEXT", "NO_WINDOW", NULL);
+	    Tcl_SetErrorCode(interp, "TK", "TEXT", "NO_WINDOW", (char *)NULL);
 	    return TCL_ERROR;
 	}
 	if (objc <= 5) {
@@ -293,6 +293,7 @@ TkTextWindowCmd(
 	ewPtr->body.ew.create = NULL;
 	ewPtr->body.ew.align = TK_ALIGN_CENTER;
 	ewPtr->body.ew.padX = ewPtr->body.ew.padY = 0;
+	ewPtr->body.ew.padXObj = ewPtr->body.ew.padYObj = NULL;
 	ewPtr->body.ew.stretch = 0;
 	ewPtr->body.ew.optionTable = Tk_CreateOptionTable(interp, optionSpecs);
 
@@ -443,7 +444,7 @@ EmbWinConfigure(
 			    Tk_PathName(ewPtr->body.ew.tkwin),
 			    Tk_PathName(textPtr->tkwin)));
 		    Tcl_SetErrorCode(textPtr->interp, "TK", "GEOMETRY",
-			    "HIERARCHY", NULL);
+			    "HIERARCHY", (char *)NULL);
 		    ewPtr->body.ew.tkwin = NULL;
 		    if (client != NULL) {
 			client->tkwin = NULL;
@@ -940,7 +941,7 @@ EmbWinLayoutProc(
 		    Tk_PathName(ewPtr->body.ew.tkwin),
 		    Tk_PathName(textPtr->tkwin)));
 	    Tcl_SetErrorCode(textPtr->interp, "TK", "GEOMETRY", "HIERARCHY",
-		    NULL);
+		    (char *)NULL);
 	    Tcl_BackgroundException(textPtr->interp, TCL_ERROR);
 	    ewPtr->body.ew.tkwin = NULL;
 	    goto gotWindow;

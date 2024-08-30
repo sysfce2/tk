@@ -1238,11 +1238,13 @@ TkWinHandleMenuEvent(
 
 	    interp = menuPtr->interp;
 	    Tcl_Preserve(interp);
+	    Tcl_Preserve(menuPtr);
 	    code = TkInvokeMenu(interp, menuPtr, mePtr->index);
 	    if (code != TCL_OK && code != TCL_CONTINUE && code != TCL_BREAK) {
 		Tcl_AddErrorInfo(interp, "\n    (menu invoke)");
 		Tcl_BackgroundException(interp, code);
 	    }
+	    Tcl_Release(menuPtr);
 	    Tcl_Release(interp);
 	    *plResult = 0;
 	    returnResult = 1;
@@ -1433,7 +1435,7 @@ TkWinHandleMenuEvent(
 		    TkActivateMenuEntry(menuPtr, TCL_INDEX_NONE);
 		} else {
 		    if (mePtr->index >= (int)menuPtr->numEntries) {
-			Tcl_Panic("Trying to activate an entry which doesn't exist");
+			Tcl_Panic("Trying to activate an entry which does not exist");
 		    }
 		    TkActivateMenuEntry(menuPtr, mePtr->index);
 		}
@@ -1598,17 +1600,17 @@ GetMenuIndicatorGeometry(
 	int borderWidth;
 
 	Tk_GetPixelsFromObj(menuPtr->interp, menuPtr->tkwin,
-		menuPtr->borderWidthPtr, &borderWidth);
+		menuPtr->borderWidthObj, &borderWidth);
 	*widthPtr = indicatorDimensions[1] - borderWidth;
 
-        /*
-         * Quite dubious about the above (why would borderWidth play a role?)
-         * and about how indicatorDimensions[1] is obtained in SetDefaults().
-         * At least don't let the result be negative!
-         */
-        if (*widthPtr < 0) {
-            *widthPtr = 0;
-        }
+	/*
+	 * Quite dubious about the above (why would borderWidth play a role?)
+	 * and about how indicatorDimensions[1] is obtained in SetDefaults().
+	 * At least don't let the result be negative!
+	 */
+	if (*widthPtr < 0) {
+	    *widthPtr = 0;
+	}
     }
 }
 
@@ -1639,12 +1641,12 @@ GetMenuAccelGeometry(
 {
     *heightPtr = fmPtr->linespace;
     if (mePtr->type == CASCADE_ENTRY) {
-        /*
-         * Cascade entries have no accelerator but do show an arrow. Set
-         * this field width to the width of the OBM_MNARROW system bitmap
-         * used to display the arrow. I couldn't find how to query the
-         * system for this value, therefore I resort to hardcoding.
-         */
+	/*
+	 * Cascade entries have no accelerator but do show an arrow. Set
+	 * this field width to the width of the OBM_MNARROW system bitmap
+	 * used to display the arrow. I couldn't find how to query the
+	 * system for this value, therefore I resort to hardcoding.
+	 */
 	*widthPtr = CASCADE_ARROW_WIDTH;
     } else if ((menuPtr->menuType != MENUBAR) && (mePtr->accelPtr != NULL)) {
 	const char *accel = Tcl_GetString(mePtr->accelPtr);
@@ -1842,7 +1844,7 @@ DrawMenuEntryIndicator(
 	    rect.top = y;
 	    rect.bottom = y + mePtr->height;
 	    Tk_GetPixelsFromObj(menuPtr->interp, menuPtr->tkwin,
-		    menuPtr->borderWidthPtr, &borderWidth);
+		    menuPtr->borderWidthObj, &borderWidth);
 	    Tk_GetPixelsFromObj(menuPtr->interp, menuPtr->tkwin,
 		    menuPtr->activeBorderWidthPtr, &activeBorderWidth);
 	    rect.left = borderWidth + activeBorderWidth + x;
@@ -1908,7 +1910,7 @@ DrawMenuEntryAccelerator(
     const char *accel;
 
     if (menuPtr->menuType == MENUBAR) {
-        return;
+	return;
     }
 
     if (mePtr->accelPtr != NULL) {
@@ -1991,8 +1993,8 @@ DrawMenuEntryArrow(
      */
 
     if ((mePtr->childMenuRefPtr == NULL)
-           || (mePtr->childMenuRefPtr->menuPtr == NULL)) {
-        return;
+	   || (mePtr->childMenuRefPtr->menuPtr == NULL)) {
+	return;
     }
 
     oldFgColor = gc->foreground;
@@ -2949,8 +2951,8 @@ DrawMenuEntryBackground(
 	Tk_Fill3DRectangle(menuPtr->tkwin, d, bgBorder, x, y, width, height,
 		activeBorderWidth, relief);
     } else {
-        Tk_Fill3DRectangle(menuPtr->tkwin, d, bgBorder, x, y, width, height, 0,
-                TK_RELIEF_FLAT);
+	Tk_Fill3DRectangle(menuPtr->tkwin, d, bgBorder, x, y, width, height, 0,
+		TK_RELIEF_FLAT);
     }
 }
 
@@ -2988,7 +2990,7 @@ TkpComputeStandardMenuGeometry(
     }
 
     Tk_GetPixelsFromObj(menuPtr->interp, menuPtr->tkwin,
-	    menuPtr->borderWidthPtr, &borderWidth);
+	    menuPtr->borderWidthObj, &borderWidth);
     x = y = borderWidth;
     indicatorSpace = labelWidth = accelWidth = 0;
     windowHeight = 0;

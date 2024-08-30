@@ -38,8 +38,6 @@
  * Meanings of Ttk states represented by User1 and User2.
  */
 
-#define TTK_STATE_FIRST_TAB     TTK_STATE_USER1
-#define TTK_STATE_LAST_TAB      TTK_STATE_USER2
 #define TTK_STATE_IS_ACCENTED   TTK_STATE_USER2
 #define TTK_TREEVIEW_STATE_SORTARROW    TTK_STATE_USER1
 
@@ -563,7 +561,7 @@ static ThemeFrameParams
 
 #define CHECK_RADIUS(radius, bounds)                                                 \
     if ((radius) > (bounds).size.width / 2 || (radius) > (bounds).size.height / 2) { \
-        return;                                                                      \
+	return;                                                                      \
     }
 
 /*
